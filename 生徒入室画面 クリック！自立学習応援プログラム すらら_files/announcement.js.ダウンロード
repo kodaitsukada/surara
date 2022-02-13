@@ -1,0 +1,37 @@
+/**
+ * ベンチャー・リンク　すらら
+ *
+ * 告知文用スクリプト
+ *
+ * 履歴
+ * 2019-09-10 初期登録
+ *
+ * @author Azet
+ */
+
+/**
+ * 告知の表示非表示を切り替えます。
+ *
+ * AC:[C]共通 UC1:[C99]その他.
+ *
+ * @author Azet
+ */
+function announcement_display_user_agent() {
+	var nvua = navigator.userAgent;
+	var userAgent = nvua;
+	// if( (userAgent.indexOf('iPad') != -1 || userAgent.indexOf('Macintosh') != -1) ){
+	if( userAgent.indexOf('iPad') != -1 || userAgent.indexOf('Macintosh') != -1  || is_ipad() ){ //kaopiz update 2020/07/15 ipados13
+		// iPad Mac の場合にはchromeの告知を非表示にする。
+		var elm = document.getElementsByClassName('display-chrome');
+		for( var i=0; i < elm.length; i++ ) {
+			elm[i].style.display = 'none';
+		}
+	} else {
+		// それ以外の場合、Macの告知を非表示にする。
+		var elm = document.getElementsByClassName('display-mac');
+		for( var i=0; i < elm.length; i++ ) {
+			elm[i].style.display = 'none';
+		}
+	}
+
+}

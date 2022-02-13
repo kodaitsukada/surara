@@ -1,0 +1,22 @@
+/**
+ * ベンチャー・リンク　すらら
+ *
+ * 色々HTML5用のツール
+ *
+ * 履歴
+ * 2014-04-18 初期登録
+ *
+ * @author Azet
+ */
+
+/**
+ * ブラウザーはHTML5のカンバスを実装されているか確認機能
+ *
+ * AC:[C]共通 UC1:[C99]その他.
+ *
+ * @author Azet
+ */
+function isCanvasSupported() {
+    var elem = document.createElement('canvas');
+    return !!(elem.getContext && elem.getContext('2d'));
+}

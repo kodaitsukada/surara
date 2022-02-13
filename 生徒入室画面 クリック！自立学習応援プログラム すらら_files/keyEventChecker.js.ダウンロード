@@ -1,0 +1,266 @@
+/**
+ * ベンチャー・リンク　すらら
+ *
+ * 勉強する時にキーボードエベントの処理
+ *
+ * 履歴
+ * 2014-10-07 初期設定
+ *
+ * @author Azet
+ */
+
+
+
+// add simon 2017-03-29 >>>
+//======================================================================
+// /www/javascript/make5_flashvars.js と同じ修正して下さい
+//======================================================================
+//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+// iPADでフッタが上がらない用
+var fixfootercounter = 0;
+function fixFooter() {
+	try {
+		var newpadding = fixfootercounter % 2 == 0 ? 0 : "1px";
+		window.top.document.getElementById('footerArea').style.paddingTop = newpadding;
+		++fixfootercounter;
+		//console.log( "footer fix:"+fixfootercounter );
+	} catch(e) {
+		// 画面が違うならば、処理が要りません
+	}
+	return true; // bubbling ok
+}
+
+// テキストフィルドにイベント追加
+// if(/iPad/.test(navigator.userAgent)) {
+if(is_ipad()) { //kaopiz update 2020/07/15 ipados13
+	//console.log( "setEvent" );
+	// kodomo
+	document.addEventListener('keyup', fixFooter, false);
+	document.addEventListener('focusout', fixFooter, false);
+}
+//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+// <<<
+
+
+
+// ======================================================================
+//			  このコードは、 www/javascript/student.js (l.508) と同じです！
+//						 変更すれば、両所にして下さい！
+//							   simon 2014-10-07
+// ======================================================================
+(function (){
+//VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
+
+var userAgent = navigator.userAgent;
+var appVersion = window.navigator.appVersion.toLowerCase();		// update oda 2017/05/08 javascriptエラー回避
+// if (userAgent.indexOf('Android') == -1 && userAgent.indexOf('iPhone') == -1 && userAgent.indexOf('iPad') == -1) {
+if (userAgent.indexOf('Android') == -1 && userAgent.indexOf('iPhone') == -1 && !is_ipad()) { //kaopiz update 2020/07/15 ipados13
+	// update start oda 2014/08/06 課題要望一覧No342 数式パレットでonkeydownイベントを使用しているので、回避する様に修正
+	//window.document.onkeydown=not_bskey;
+	if (appVersion.indexOf("msie 7.") != -1 || appVersion.indexOf("msie 8.") != -1) {
+		window.document.onkeydown=not_bskey;
+	} else if (appVersion.indexOf("msie 9.") != -1) {
+		window.document.attachEvent("onkeydown", not_bskey);
+	} else {
+		window.onkeydown=not_bskey;
+	}
+	// update end oda 2014/08/06
+}
+//add okabe start 2017/03/10 右クリック抑制(Chromebook対応)
+if(appVersion.indexOf("chrome") != -1) {
+//console.log("oncontextmenu");
+	window.oncontextmenu = cancel_contextmenu;
+}
+//Chromeの場合、右クリックを禁止する。
+function cancel_contextmenu(e) {
+//console.log("canceled");
+	return false;
+}
+//add okabe end 2017/03/10
+
+/**
+ * BackSpaceキー押下防止
+ *
+ * AC:[S]生徒 UC1:[L99]その他.
+ *
+ * @author Azet
+ * @param {event} e
+ */
+function not_bskey(e) {
+
+	var tagname;
+	var i_type;
+	var i_flag;
+	var appVersion = window.navigator.appVersion.toLowerCase(); // add 2016/08/23 yoshizawa 課題要望No.552
+
+	// add simon 2014-10-07 >>>
+	if(!inspectorBlocker.keyCheck(e)) {
+		return false;
+	}
+	// <<<
+
+	// update start 2016/08/23 yoshizawa 課題要望No.552
+	//if (navigator.appName == "Microsoft Internet Explorer") {
+	// IE or Edgeの場合
+	if(appVersion.indexOf("msie 9.") != -1 || appVersion.indexOf("msie 10.") != -1 || appVersion.indexOf("trident/7") != -1 || appVersion.indexOf("edge") != -1 ){
+	// update end 2016/08/23 yoshizawa 課題要望No.552
+
+		//ALT＋←ダメ
+		if( event.keyCode == 0x25 && event.altKey === true ) {
+			//alert("ALT＋←はダメ！");
+			return false ;
+		}
+
+		tagname = window.document.activeElement.tagName;
+
+		if((tagname == "INPUT") ||(tagname == "TEXTAREA")){
+			i_type = window.document.activeElement.type;
+			i_flag = window.document.activeElement.readOnly;
+
+			//if(((tagname == "INPUT") && (i_flag == false) && ((i_type == "text") ||(i_type == "password")))								// del oda 2013/01/29
+			if(((tagname == "INPUT") && (i_flag === false) && ((i_type == "text") ||(i_type == "password") || (i_type == "number"))) ||		// add oda 2013/01/29
+				((tagname == "TEXTAREA") && (i_flag === false))) {
+				return true;
+			}
+		}
+
+		//BackSpaceダメ
+		if( event.keyCode == 8 ) {
+			//alert("BackSpaseはダメ！");
+			return false ;
+		}
+	// update start 2016/08/23 yoshizawa 課題要望No.552
+	////} else if (navigator.appName == "Netscape") {										// del oda 2013/01/10
+	//} else if (navigator.appName == "Netscape" || navigator.appName == "Opera") {		// add oda 2013/01/10
+	// IE 以外の場合
+	} else if(appVersion.indexOf("chrome") != -1 ||	appVersion.indexOf("safari") != -1 || appVersion.indexOf("firefox") != -1 || appVersion.indexOf("opera") != -1 ){
+	// update end 2016/08/23 yoshizawa 課題要望No.552
+
+		if (e.which == 8) {
+			// add start oda 2013/01/10
+			if (document.activeElement) {
+				tagname = window.document.activeElement.tagName;
+				if((tagname == "INPUT") ||(tagname == "TEXTAREA")){
+					i_type = window.document.activeElement.type;
+					//if(((tagname == "INPUT") && ((i_type == "text") || (i_type == "password")))										// del oda 2013/01/29
+					if(((tagname == "INPUT") && ((i_type == "text") || (i_type == "password") || (i_type == "number"))) ||				// add oda 2013/01/29
+						 (tagname == "TEXTAREA")) {
+							return true;
+					}
+				}
+			}
+			// add end oda 2013/01/10
+			return false;
+		}
+		// add start 2016/08/23 yoshizawa 課題要望No.552
+		// chromeの場合Alt押下で設定ボタンへフォーカスが切り替わり、Alt＋←が効いてしまうのでAltを無効化する
+		if( e.which == 0x12 && e.altKey === true && appVersion.indexOf('chrome') != -1 ) { return false; }
+		// Alt＋←ダメ
+		if( e.which == 0x25 && e.altKey === true ) { return false; }
+		// add end 2016/08/23 yoshizawa 課題要望No.552
+	}
+}
+// end of function not_bskey()
+
+// add simon 2014-10-07 >>>
+// ウエブインスペクターをブロッキング機能
+var inspectorBlocker = {
+	last_keys : [],
+	blocking : true,
+	inspector_code : [83, 85, 82, 65, 76, 65, 73, 84],
+	/**
+	 * ウエブインスペクターをブロッキング機能
+	 * @param {event} e_	Event object
+	 * @returns  {boolean}	Bool true if we can continue the chain of events, or false if we blocked the console key
+	 */
+	keyCheck : function(e_) {
+		var words_diff,
+			ie_mode = false;
+
+		if(/MSIE (7|8|9)/.test(navigator.userAgent)) {
+			ie_mode = true;
+			e_ = window.event;
+		}
+
+		//console.log( e_ );
+		//document.getElementById("console").innerHTML = e_.keyCode + "<br>";
+		if(this.blocking===false) return true;
+
+		if(
+			// ===== ウエブインスペクター =====
+			// chrome, IE, Firefox		(F12)
+			e_.keyCode===123 ||
+			// Edge		(Ctrl+Shift+m)											// add oda 2018/05/14 Edgeのメモ機能を制限します
+			(e_.ctrlKey===true && e_.shiftKey===true && e_.keyCode==77) ||
+			// Safari		(Ctrl+Alt+i)
+			(e_.ctrlKey===true && e_.altKey===true && e_.keyCode==73) ||
+			// Opera (webkit engine)		(Ctrl+Shift+i)
+			(e_.ctrlKey===true && e_.shiftKey===true && e_.keyCode==73) ||
+			// ===== ソース表示=====
+			// chrome, ie10~, firefox, opera (Ctrl+u)
+			(e_.ctrlKey===true && e_.keyCode==85) ||
+			// safari (Ctrl+Alt+u)
+			(e_.ctrlKey===true && e_.altKey===true && e_.keyCode==85)
+		) {
+			// eventをブロックします,IE9から
+			if(ie_mode===false) {
+				e_.preventDefault();
+			}
+			//ブロッキング
+			return false;
+		}
+
+		// パスの比較＋last_keyの掃除
+		this.last_keys.push(e_.keyCode);
+		words_diff = this.last_keys.length - this.inspector_code.length;
+		if(words_diff>0) {
+			this.last_keys.splice(0, words_diff);
+		}
+
+		// unlock inspector
+		if(this.inspector_code.join() === this.last_keys.join()) {
+			this.blocking = false;
+			//console.log( "Stop blocking!" );
+		}
+
+		//他のeventを進んでいい
+		return true;
+	}
+};
+// <<<
+
+// add simon 2015-05-19 >>>
+//　たてスクロールをでくるために。
+if(/android/i.test(navigator.userAgent)) {
+	var frame = window.top.document.getElementById('main_check');
+	if(frame) {
+		var bkp =  getComputedStyle(frame)['height'].replace('px', '')*1;
+
+		//add okabe start 2015/05/21
+		// 親ページごと入れ替える際は index.php を経てから表示すべきページへ遷移するため、
+		// index.php 読み込みの時点ではピクセル一時移動処理は行わない。
+		var src_str = frame.src;
+		var right_src_char = "";
+		if (src_str.length > 0) {
+			right_src_char = src_str.substr(src_str.length - 1, 1);
+		}
+		if (frame.src.indexOf('/index.php') < 0 && right_src_char != "/") {
+		//add okabe end 2015/05/21
+
+			// setting
+			frame.style.height = (bkp+1)+'px';
+
+			setTimeout(function() {
+				frame.style.height = bkp+'px';
+				//console.log( "fine!" );
+			}, 100);
+
+		} //add okabe 2015/05/21
+
+	}
+}
+// <<<
+
+
+//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+})();

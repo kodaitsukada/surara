@@ -1,0 +1,25 @@
+// kaopiz add 2020/07/15 ipados13 start
+/**
+ * check if user's device is ipad
+ *
+ * @returns {boolean} true: is ipad, false: is not ipad
+ *
+ * @author kaopiz
+ */
+function is_ipad() {
+    if (navigator.userAgent.indexOf('iPad') !== -1) {
+        document.cookie='isIpad=1';
+        return true;
+    } else if (navigator.userAgent.indexOf('Macintosh') !== -1 ) {
+        if(navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) {
+            document.cookie='isIpad=1';
+            return true;
+        }
+    }
+    document.cookie='isIpad=0';
+    return false;
+}
+
+// set cookie for ipad detecting on server
+is_ipad();
+// kaopiz add 2020/07/15 ipados13 end

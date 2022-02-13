@@ -1,0 +1,54 @@
+/**
+ * ベンチャー・リンク　すらら
+ *
+ * ブラウザーはフラッシュをサポートするか確認
+ *
+ * 履歴
+ * 2014/10/28 初期設定
+ *
+ * @author Azet
+ */
+
+//	CheckIfFlashEnabled.js
+//   M.Okabe
+
+/**
+ * ブラウザーはフラッシュをサポートするか確認
+ *
+ * AC:[S]生徒 UC1:[L06]勉強をする.
+ *
+ * @author Azet
+ */
+function CheckIfFlashEnabled() {
+
+	var flash = 0;
+	try{
+	    var f = new ActiveXObject("ShockwaveFlash.ShockwaveFlash");
+	    flash = 1;
+	} catch(e) {
+	    flash = 0;
+	}
+	if (!flash){
+	    if (navigator.mimeTypes && navigator.mimeTypes["application/x-shockwave-flash"] ?navigator.mimeTypes["application/x-shockwave-flash"].enabledPlugin : 0){
+	        flash = 1;
+	    }
+	}
+
+	return flash;
+
+}
+
+/**
+ * ブラウザーはフラッシュをサポートすればクキー設定
+ *
+ * AC:[S]生徒 UC1:[L06]勉強をする.
+ *
+ * @author Azet
+ */
+function checkAndSetCookie() {
+	if (CheckIfFlashEnabled()) {
+		var s = "enableflash=1; path=/; expires=0;";
+		document.cookie = s;
+	}
+}
+

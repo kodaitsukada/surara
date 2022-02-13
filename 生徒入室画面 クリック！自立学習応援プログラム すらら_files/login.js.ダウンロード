@@ -1,0 +1,231 @@
+/**
+ * ベンチャー・リンク　すらら
+ *
+ * ログイン関連JavaScript
+ *
+ * @author Azet
+ */
+
+/**
+ * すららボタンウィンドオープン
+ *
+ * AC:[S]生徒 UC1:[C01]ログイン.
+ *
+ * @author Azet
+ * @param {integer} login_type
+ */
+function wopen(login_type){
+
+	var strTemp;
+	//画面の解像度を取得します。
+	nSizeWidth = 0;
+	nSizeHeight = 0;
+	nSizeWidth = screen.width;
+	nSizeHeight = screen.height;
+	//取得した解像度の子ウィンドウを開きます。
+	var nvua = navigator.userAgent;
+	userAgent = nvua;
+	nvua = nvua.split('(');
+	nvua = nvua[1];
+	nvua = nvua.split(';');
+	var br = nvua[1]
+	var sp = nvua[3]
+	nvua = nvua[2];
+	if (nvua != undefined) {
+		nvua = nvua.split(' ');
+	}
+
+	if (br != undefined) {
+		br = br.split(' ');
+		br = br[2];
+	}
+
+	if (nvua != undefined && nvua[3]) {
+		nvua = nvua[3];
+		nvua = nvua.split(')');
+		nvua = nvua[0];
+	} else {
+		nvua = 0;
+	}
+
+	if(nvua <= 5) {
+		if(br >= 7) {
+			strTemp = "scrollbars=yes,resizable=yes";
+			strTemp += ",fullscreen=yes";
+		} else {
+			var h=screen.height;
+			h = h - 52;
+			var w=screen.width;
+			w = w - 4;
+			strTemp = 'width='+w+',height='+h;
+			strTemp += ",scrollbars=yes,resizable=no,status=no";
+		}
+	} else {
+		if (document.all) {
+			strTemp = "scrollbars=yes,resizable=yes";
+			strTemp += ",fullscreen=yes";
+		} else {
+			var h=screen.height;
+			h = h - 52;
+			var w=screen.width;
+			w = w - 4;
+			strTemp = 'width='+w+',height='+h;
+			strTemp += ",scrollbars=yes,resizable=no,status=no";
+			strTemp += ",left=0,top=0";
+		}
+	}
+
+	// add start oda 2014/01/21 Win7_IE11 No15 IE11の時はユーザエージェントの判断がまったく異なるので、別途判断する。
+	if (nvua == 0) {
+		var checkUserAgent = navigator.userAgent;
+		if (checkUserAgent.indexOf('rv:11') != -1 && checkUserAgent.indexOf('Trident') != -1) {
+			var h = screen.height;
+			h = h - 52;	//	76
+			var w = screen.width;
+			w = w - 4;
+			strTemp  = 'width='+w+',height='+h;
+			strTemp += ",scrollbars=yes,resizable=yes,left=0,top=0";
+		}
+	}
+	// add end oda 2014/01/21 Win7_IE11 No10
+
+	if (login_type == 1) {
+		//	座席データーを復活させる為
+		window.location.reload();
+		var target = './student/login_school.php';
+//	} else if (login_type == 2) {						// del oda 2020/07/18 学習管理画面リニューアル e-te専用ログインは利用していない
+//		var target = './exam/login_form_exam.php';		// del oda 2020/07/18 学習管理画面リニューアル e-te専用ログインは利用していない
+	// del start okabe 2014/03/06 B社ログイン
+	/*
+	} else {
+		var target = './student/login.php';
+	*/
+	// del end okabe 2014/03/06 B社ログイン
+	// add start okabe 2014/03/06 B社ログイン
+	} else if (login_type == 0) {
+		var target = './student/login.php';
+	} else {
+		var target = login_type;
+	// add end okabe 2014/03/06 B社ログイン
+	}
+
+	// if (userAgent.indexOf('Android') != -1 || userAgent.indexOf('iPhone') != -1 || userAgent.indexOf('iPad') != -1) {
+	if (userAgent.indexOf('Android') != -1 || userAgent.indexOf('iPhone') != -1 || userAgent.indexOf('iPad') != -1 || is_ipad()) { //kaopiz update 2020/07/15 ipados13
+		location.href = target;
+	} else if (strTemp) {
+		//var NWIN = window.open(target,'study',strTemp);	//del okabe 2014/03/12 ログイン仕様変更
+		//add start okabe 2014/03/12 ログイン仕様変更
+		if (login_type == 1 || login_type == 2 || login_type == 0) {
+			var NWIN = window.open('','study',strTemp);
+			document.form.submit();
+		} else {
+			var NWIN = window.open(target,'study',strTemp);	//B社向けログインは従来遷移
+		}
+		//add end okabe 2014/03/12 ログイン仕様変更
+	}
+
+	if (NWIN) {
+		NWIN.focus();
+		if(nvua <= 5) { NWIN.moveTo(0,0); }
+	} else {
+		data = "&type=CAN NOT OPEN WINDOW";
+		dataFileName = '/student/error_system.php';
+		sendRequest(onloaded,data,'POST',dataFileName,true)
+	}
+
+	return false;
+}
+
+
+// 2重登録防止判断フラグ
+var login_flag = 0;
+
+/**
+ * すらら用の路銀処理
+ *
+ * AC:[S]生徒 UC1:[C01]ログイン.
+ *
+ * @author Azet
+ */
+function surala_login() {
+
+	// ログインボタンオブジェクト取得→使用不可にする
+	var btn = document.getElementById("submit_button");
+	if (btn) {
+		btn.disabled = true;
+	}
+
+	// 2重登録防止判断
+	if (login_flag == 0) {
+
+		// 2重登録防止
+		login_flag = 1;
+
+		// formオブジェクト取得
+		var form_obj = document.getElementById("login_form");
+		// 画面遷移制御
+		form_obj.submit();
+	}
+	return false;
+}
+
+/**
+ * TOEIC用のログイン処理
+ *
+ * AC:[S]生徒 UC1:[C01]ログイン.
+ *
+ * @author Azet
+ */
+function toeic_login() {
+
+	// ログインボタンオブジェクト取得→使用不可にする
+	var btn = document.getElementById("submit");
+	if (btn) {
+		btn.disabled = true;
+	}
+
+	// 2重登録防止判断
+	if (login_flag == 0) {
+
+		// 2重登録防止
+		login_flag = 1;
+
+		// formオブジェクト取得
+		var form_obj = document.getElementById("login_form");
+		// 画面遷移制御
+		form_obj.submit();
+	}
+	return false;
+}
+
+//add okabe 2014/05/01
+var moleeVersion = false;
+/**
+ * moleeバージョンの取得（moleeアクセスの判別）
+ *
+ * AC:[S]生徒 UC1:[C01]ログイン.
+ *
+ * @author Azet
+ */
+function molee_check_login() {
+//alert("*molee_check_login:");
+	try {
+		StageWebViewBridge.call('moleeVersion', getMoleeVersion);
+	} catch(e) {
+		moleeVersion = false;
+	}
+	function getMoleeVersion(moleeVer)
+	{
+		moleeVersion = moleeVer;
+//alert("*"+moleeVer);
+		var id_molee_ver = document.getElementById("molee_ver");
+		if (id_molee_ver) {
+			id_molee_ver.value = moleeVer;
+
+			//header部のみにする add okabe 2014/05/02
+			StageWebViewBridge.call('setMainVisible', null, false);
+			StageWebViewBridge.call('setFooterVisible', null, false);
+			StageWebViewBridge.call('setHeaderHeight', null, "100%");
+		}
+	}
+}
